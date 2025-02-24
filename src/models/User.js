@@ -21,4 +21,6 @@ const UserSchema = new mongoose.Schema({
   strict: false  // This allows for flexible account data
 });
 
+
+
 export default mongoose.models.User || mongoose.model('User', UserSchema);
