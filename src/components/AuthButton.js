@@ -20,11 +20,11 @@ export default function AuthButton() {
       </div>
       <div className='hidden md:block' >
 
-      <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdqDrXafqmYEztKVcjrYlGWsJE4Y7ugJCamlJtA9kUXTeYDHg/viewform" width="640" height="722" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+      <iframe src="https://forms.gle/CgZLtYzL25rmiZw89" width="640" height="722" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
       </div>
       <div className='block md:hidden'>
 
-      <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdqDrXafqmYEztKVcjrYlGWsJE4Y7ugJCamlJtA9kUXTeYDHg/viewform"  width="380" height="700" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+      <iframe src="https://forms.gle/CgZLtYzL25rmiZw89"  width="380" height="700" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
       </div>
       
       </div>
