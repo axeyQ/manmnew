@@ -4,8 +4,6 @@ import GoogleProvider from 'next-auth/providers/google';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 
-dbConnect();
-
 const handler = NextAuth({
   providers: [
     GoogleProvider({
@@ -63,6 +61,8 @@ const handler = NextAuth({
     },
     async session({ session, token }) {
       try {
+        await dbConnect();
+        
         const user = await User.findOne({ email: session.user.email });
         if (user) {
           session.user.id = user._id.toString();
