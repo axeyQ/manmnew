@@ -1,82 +1,41 @@
-// src/app/api/auth/[...nextauth]/route.js
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
-import dbConnect from '@/lib/mongodb';
-import User from '@/models/User';
+import { MongoDBAdapter } from '@auth/mongodb-adapter';
+import clientPromise from '@/lib/mongodb';
 
-const handler = NextAuth({
+export const authOptions = {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_ID,
-      clientSecret: process.env.GOOGLE_SECRET,
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
+  adapter: MongoDBAdapter(clientPromise),
   callbacks: {
-    async signIn({ user, account }) {
-      try {
-        await dbConnect();
-        
-        // Check if user exists
-        let dbUser = await User.findOne({ email: user.email });
-        
-        if (!dbUser) {
-          // Create new user
-          dbUser = await User.create({
-            name: user.name,
-            email: user.email,
-            image: user.image,
-            accounts: []  // Initialize empty accounts array
-          });
-        }
-
-        // Update or add the account
-        const accountExists = dbUser.accounts.some(acc => 
-          acc.provider === account.provider && 
-          acc.providerAccountId === account.providerAccountId
-        );
-
-        if (!accountExists) {
-          dbUser.accounts.push({
-            provider: account.provider,
-            providerAccountId: account.providerAccountId,
-            type: account.type,
-            access_token: account.access_token,
-            expires_at: account.expires_at,
-            scope: account.scope,
-            id_token: account.id_token,
-            session_state: account.session_state
-          });
-        }
-
-        // Update user info
-        dbUser.name = user.name;
-        dbUser.image = user.image;
-        
-        await dbUser.save();
-        return true;
-      } catch (error) {
-        console.error('Error in signIn callback:', error);
-        return true;  // Still allow sign in even if DB operation fails
+    async session({ session, user }) {
+      // Add user ID to session for easier access
+      if (session?.user) {
+        session.user.id = user.id;
       }
+      return session;
     },
-    async session({ session, token }) {
-      try {
-        await dbConnect();
-        
-        const user = await User.findOne({ email: session.user.email });
-        if (user) {
-          session.user.id = user._id.toString();
-        }
-        return session;
-      } catch (error) {
-        console.error('Session callback error:', error);
-        return session;
-      }
+    async redirect({ url, baseUrl }) {
+      // Redirect back to homepage after authentication
+      return baseUrl;
+    },
+    async signIn({ user, account, profile, email, credentials }) {
+      // Allow sign in regardless of whether the account is linked or not
+      return true;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET
-});
+  pages: {
+    signIn: '/',
+    error: '/',
+  },
+  // Allow account linking
+  allowDangerousEmailAccountLinking: true,
+  secret: process.env.NEXTAUTH_SECRET,
+};
 
-
-
+const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
